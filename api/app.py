@@ -1,5 +1,6 @@
 import os
 import json
+import threading
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -8,6 +9,7 @@ CORS(app)
 
 # Nome do arquivo para armazenar os dados
 DATA_FILE = 'data.json'
+lock = threading.Lock()
 
 # Função para carregar dados do arquivo JSON
 def load_data():
@@ -19,15 +21,14 @@ def load_data():
             {"id": 1, "nome": "Militar", "preco": "R$10"},
             {"id": 2, "nome": "Social", "preco": "R$15"},
             {"id": 3, "nome": "Degradê", "preco": "R$30"},
-            {"id": 4, "nome": "Feminino", "preco": "R$40"},
-            {"id": 5, "nome": "Luzes", "preco": "R$80"}
+            {"id": 4, "nome": "Feminino", "preco": "R$40"}
         ],
         "barbas": [
             {"id": 1, "nome": "Simples", "preco": "R$10"},
             {"id": 2, "nome": "Desenhada", "preco": "R$30"},
             {"id": 3, "nome": "Completa", "preco": "R$35"}
         ],
-        "outrosservicos": [
+        "outrosServicos": [
             {"id": 1, "nome": "Design de sobrancelhas", "preco": "R$20"},
             {"id": 2, "nome": "Limpeza de sobrancelhas", "preco": "R$25"}
         ]
@@ -35,11 +36,19 @@ def load_data():
 
 # Função para salvar dados no arquivo JSON
 def save_data(data):
-    with open(DATA_FILE, 'w') as file:
-        json.dump(data, file)
+    with lock:
+        with open(DATA_FILE, 'w') as file:
+            json.dump(data, file)
+        print(f"Dados salvos: {data}")
 
 # Carregar dados na memória
 data = load_data()
+
+@app.before_first_request
+def initialize_data():
+    global data
+    data = load_data()
+    print(f"Dados carregados na inicialização: {data}")
 
 def get_item(service_type, item_id):
     for item in data[service_type]:
@@ -84,7 +93,7 @@ def update(service_type, item_id):
         return jsonify(item)
     return jsonify({"error": "Item não encontrado"}), 404
 
-@app.route('/<service_type>/<int:item_id>', methods=['DELETE'])
+@app.route('/<service_type>/<int)item_id>', methods=['DELETE'])
 def delete(service_type, item_id):
     item = get_item(service_type, item_id)
     if item:
@@ -92,10 +101,6 @@ def delete(service_type, item_id):
         save_data(data)  # Salvar dados após deletar item
         return jsonify({"message": "Item deletado com sucesso"})
     return jsonify({"error": "Item não encontrado"}), 404
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
