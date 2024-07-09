@@ -1,6 +1,5 @@
 import os
 import json
-import threading
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -9,7 +8,6 @@ CORS(app)
 
 # Nome do arquivo para armazenar os dados
 DATA_FILE = 'data.json'
-lock = threading.Lock()
 
 # Função para carregar dados do arquivo JSON
 def load_data():
@@ -28,7 +26,7 @@ def load_data():
             {"id": 2, "nome": "Desenhada", "preco": "R$30"},
             {"id": 3, "nome": "Completa", "preco": "R$35"}
         ],
-        "outrosServicos": [
+        "outrosservicos": [
             {"id": 1, "nome": "Design de sobrancelhas", "preco": "R$20"},
             {"id": 2, "nome": "Limpeza de sobrancelhas", "preco": "R$25"}
         ]
@@ -36,19 +34,11 @@ def load_data():
 
 # Função para salvar dados no arquivo JSON
 def save_data(data):
-    with lock:
-        with open(DATA_FILE, 'w') as file:
-            json.dump(data, file)
-        print(f"Dados salvos: {data}")
+    with open(DATA_FILE, 'w') as file:
+        json.dump(data, file)
 
 # Carregar dados na memória
 data = load_data()
-
-@app.before_first_request
-def initialize_data():
-    global data
-    data = load_data()
-    print(f"Dados carregados na inicialização: {data}")
 
 def get_item(service_type, item_id):
     for item in data[service_type]:
@@ -93,7 +83,7 @@ def update(service_type, item_id):
         return jsonify(item)
     return jsonify({"error": "Item não encontrado"}), 404
 
-@app.route('/<service_type>/<int)item_id>', methods=['DELETE'])
+@app.route('/<service_type>/<int:item_id>', methods=['DELETE'])
 def delete(service_type, item_id):
     item = get_item(service_type, item_id)
     if item:
