@@ -1,5 +1,6 @@
 import os
 import json
+import threading
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -8,6 +9,7 @@ CORS(app)
 
 # Nome do arquivo para armazenar os dados
 DATA_FILE = 'data.json'
+lock = threading.Lock()
 
 # Função para carregar dados do arquivo JSON
 def load_data():
@@ -26,7 +28,7 @@ def load_data():
             {"id": 2, "nome": "Desenhada", "preco": "R$30"},
             {"id": 3, "nome": "Completa", "preco": "R$35"}
         ],
-        "outrosservicos": [
+        "outrosServicos": [
             {"id": 1, "nome": "Design de sobrancelhas", "preco": "R$20"},
             {"id": 2, "nome": "Limpeza de sobrancelhas", "preco": "R$25"}
         ]
@@ -34,11 +36,19 @@ def load_data():
 
 # Função para salvar dados no arquivo JSON
 def save_data(data):
-    with open(DATA_FILE, 'w') as file:
-        json.dump(data, file)
+    with lock:
+        with open(DATA_FILE, 'w') as file:
+            json.dump(data, file)
+        print(f"Dados salvos: {data}")
 
 # Carregar dados na memória
 data = load_data()
+
+@app.before_first_request
+def initialize_data():
+    global data
+    data = load_data()
+    print(f"Dados carregados na inicialização: {data}")
 
 def get_item(service_type, item_id):
     for item in data[service_type]:
@@ -55,10 +65,14 @@ def home():
 
 @app.route('/<service_type>', methods=['GET'])
 def get_all(service_type):
+    if service_type not in data:
+        return jsonify({"error": "Serviço não encontrado"}), 404
     return jsonify(data.get(service_type, []))
 
 @app.route('/<service_type>/<int:item_id>', methods=['GET'])
 def get_one(service_type, item_id):
+    if service_type not in data:
+        return jsonify({"error": "Serviço não encontrado"}), 404
     item = get_item(service_type, item_id)
     if item:
         return jsonify(item)
@@ -66,6 +80,8 @@ def get_one(service_type, item_id):
 
 @app.route('/<service_type>', methods=['POST'])
 def create(service_type):
+    if service_type not in data:
+        return jsonify({"error": "Serviço não encontrado"}), 404
     item = request.json
     item['id'] = max([i['id'] for i in data[service_type]] or [0]) + 1
     data[service_type].append(item)
@@ -75,6 +91,8 @@ def create(service_type):
 
 @app.route('/<service_type>/<int:item_id>', methods=['PUT'])
 def update(service_type, item_id):
+    if service_type not in data:
+        return jsonify({"error": "Serviço não encontrado"}), 404
     item = get_item(service_type, item_id)
     if item:
         for key, value in request.json.items():
@@ -85,6 +103,8 @@ def update(service_type, item_id):
 
 @app.route('/<service_type>/<int:item_id>', methods=['DELETE'])
 def delete(service_type, item_id):
+    if service_type not in data:
+        return jsonify({"error": "Serviço não encontrado"}), 404
     item = get_item(service_type, item_id)
     if item:
         data[service_type].remove(item)
