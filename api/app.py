@@ -19,7 +19,8 @@ def load_data():
             {"id": 1, "nome": "Militar", "preco": "R$10"},
             {"id": 2, "nome": "Social", "preco": "R$15"},
             {"id": 3, "nome": "Degradê", "preco": "R$30"},
-            {"id": 4, "nome": "Feminino", "preco": "R$40"}
+            {"id": 4, "nome": "Feminino", "preco": "R$40"},
+            {"id": 5, "nome": "Luzes", "preco": "R$80"}
         ],
         "barbas": [
             {"id": 1, "nome": "Simples", "preco": "R$10"},
