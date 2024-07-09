@@ -14,8 +14,16 @@ lock = threading.Lock()
 # Função para carregar dados do arquivo JSON
 def load_data():
     if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as file:
-            return json.load(file)
+        try:
+            with open(DATA_FILE, 'r') as file:
+                return json.load(file)
+        except json.JSONDecodeError:
+            print("Erro ao decodificar o arquivo JSON")
+            return initialize_default_data()
+    return initialize_default_data()
+
+# Função para inicializar dados padrão
+def initialize_default_data():
     return {
         "cortes": [
             {"id": 1, "nome": "Militar", "preco": "R$10"},
@@ -37,9 +45,12 @@ def load_data():
 # Função para salvar dados no arquivo JSON
 def save_data(data):
     with lock:
-        with open(DATA_FILE, 'w') as file:
-            json.dump(data, file)
-        print(f"Dados salvos: {data}")
+        try:
+            with open(DATA_FILE, 'w') as file:
+                json.dump(data, file)
+            print(f"Dados salvos: {data}")
+        except IOError:
+            print("Erro ao salvar o arquivo JSON")
 
 # Carregar dados na memória
 data = load_data()
@@ -101,7 +112,7 @@ def update(service_type, item_id):
         return jsonify(item)
     return jsonify({"error": "Item não encontrado"}), 404
 
-@app.route('/<service_type>/<int:item_id>', methods=['DELETE'])
+@app.route('/<service_type>/<int)item_id>', methods=['DELETE'])
 def delete(service_type, item_id):
     if service_type not in data:
         return jsonify({"error": "Serviço não encontrado"}), 404
