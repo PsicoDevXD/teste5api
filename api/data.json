@@ -1,0 +1,17 @@
+{
+    "cortes": [
+        {"id": 1, "nome": "Militar", "preco": "R$10"},
+        {"id": 2, "nome": "Social", "preco": "R$15"},
+        {"id": 3, "nome": "Degradê", "preco": "R$30"},
+        {"id": 4, "nome": "Feminino", "preco": "R$40"}
+    ],
+    "barbas": [
+        {"id": 1, "nome": "Simples", "preco": "R$10"},
+        {"id": 2, "nome": "Desenhada", "preco": "R$30"},
+        {"id": 3, "nome": "Completa", "preco": "R$35"}
+    ],
+    "outrosservicos": [
+        {"id": 1, "nome": "Design de sobrancelhas", "preco": "R$20"},
+        {"id": 2, "nome": "Limpeza de sobrancelhas", "preco": "R$25"}
+    ]
+}
