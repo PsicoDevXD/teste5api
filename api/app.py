@@ -26,7 +26,7 @@ def load_data():
             {"id": 2, "nome": "Desenhada", "preco": "R$30"},
             {"id": 3, "nome": "Completa", "preco": "R$35"}
         ],
-        "outrosServicos": [
+        "outrosservicos": [
             {"id": 1, "nome": "Design de sobrancelhas", "preco": "R$20"},
             {"id": 2, "nome": "Limpeza de sobrancelhas", "preco": "R$25"}
         ]
